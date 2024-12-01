@@ -1,6 +1,7 @@
 package com.example.telegram_bot.config;
 
 import com.example.telegram_bot.service.TelegramBot;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
