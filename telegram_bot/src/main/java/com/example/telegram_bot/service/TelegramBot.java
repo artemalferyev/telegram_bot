@@ -1,6 +1,7 @@
 package com.example.telegram_bot.service;
 
 import com.example.telegram_bot.config.BotConfig;
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -27,7 +28,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         listOfCommands.add(new BotCommand("/mydata", "сохранить данные"));
         listOfCommands.add(new BotCommand("/deletedata", "удалить данные"));
         listOfCommands.add(new BotCommand("/info", "информация, как использовать бота"));
-        listOfCommands.add(new BotCommand("/settings", "установить настройки"));
+        listOfCommands.add(new BotCommand("/settings", "wTF"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         }
@@ -64,7 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
 
-        String answer = "Привет, " + name + ", приятно познакомиться!";
+        String answer = EmojiParser.parseToUnicode("Добро пожаловать в байер-сервис KUPIDON" + " :white_heart: " + name);
 
         sendMessage(chatId, answer);
     }
