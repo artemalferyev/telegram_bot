@@ -78,27 +78,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
 
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-
-        KeyboardRow row = new KeyboardRow();
-
-        row.add("Посчитать сумму заказа");
-        row.add("Информация о доставке");
-
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-
-        row.add("Вызвать менеджера");
-
-        keyboardRows.add(row);
-
-        keyboardMarkup.setKeyboard(keyboardRows);
-
-        message.setReplyMarkup(keyboardMarkup);
-
         try {
             execute(message);
         } catch (TelegramApiException e) {
