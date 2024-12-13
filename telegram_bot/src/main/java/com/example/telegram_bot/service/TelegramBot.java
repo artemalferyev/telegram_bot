@@ -65,7 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
 
-        String whiteHeart = "\uD83E\uDEE1";
+        String whiteHeart = "\uD83E\uDD0D"; 
         String answer = "Добро пожаловать в байер-сервис KUPIDON " + whiteHeart + " " + name;
 
         sendMessage(chatId, answer);
