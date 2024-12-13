@@ -65,9 +65,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
 
-        String parsedEmoji = EmojiParser.parseToUnicode(":white_heart:");
-
-        String answer = EmojiParser.parseToUnicode("Добро пожаловать в байер-сервис KUPIDON" + parsedEmoji + name);
+        String whiteHeart = "\uD83E\uDEE1";
+        String answer = "Добро пожаловать в байер-сервис KUPIDON " + whiteHeart + " " + name;
 
         sendMessage(chatId, answer);
     }
