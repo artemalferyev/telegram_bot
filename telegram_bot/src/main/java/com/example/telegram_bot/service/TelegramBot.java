@@ -10,8 +10,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -67,7 +65,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
 
-        String answer = EmojiParser.parseToUnicode("Добро пожаловать в байер-сервис KUPIDON" + " :white_heart: " + name);
+        String parsedEmoji = EmojiParser.parseToUnicode(":white_heart:");
+
+        String answer = EmojiParser.parseToUnicode("Добро пожаловать в байер-сервис KUPIDON" + parsedEmoji + name);
 
         sendMessage(chatId, answer);
     }
