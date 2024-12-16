@@ -10,6 +10,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -57,16 +59,31 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                         startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
+
+                case "/register":
+
+                    register(chatId);
+                    break;
+                    
                 default:
-                        sendMessage(chatId, "Прости, эта команда невозможна.");
+                        sendMessage(chatId, "Неизвестная команда. Используйте /start.");
             }
         }
     }
 
+    private void register(long chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText("Вы хотите зарегистрироваться?");
+
+        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+    }
+
     private void startCommandReceived(long chatId, String name) {
 
-        String whiteHeart = "\uD83E\uDD0D"; 
-        String answer = "Добро пожаловать в байер-сервис KUPIDON " + whiteHeart + " " + name;
+        String whiteHeart = "\uD83E\uDD0D";
+        String answer = name + ", добро пожаловать в байер-сервис KUPIDON " + whiteHeart;
 
         sendMessage(chatId, answer);
     }
