@@ -27,10 +27,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.config = config;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "получить приветствование"));
-        listOfCommands.add(new BotCommand("/mydata", "сохранить данные"));
-        listOfCommands.add(new BotCommand("/deletedata", "удалить данные"));
-        listOfCommands.add(new BotCommand("/info", "информация, как использовать бота"));
-        listOfCommands.add(new BotCommand("/settings", "wTF"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         }
@@ -47,7 +43,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getToken();
     }
-
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -68,6 +63,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             if (callbackData.equals("start")) {
                 startCommandReceived(chatId, update.getCallbackQuery().getFrom().getFirstName());
+            } else if (callbackData.equals("reviews")) {
+                sendReviewsLink(chatId);
+            } else if (callbackData.equals("instagram")) {
+                sendInstagramLink(chatId);
+            } else if (callbackData.equals("manager")) {
+                sendManagerChat(chatId);
             }
         }
     }
@@ -76,23 +77,34 @@ public class TelegramBot extends TelegramLongPollingBot {
         String whiteHeart = "\uD83E\uDD0D";
         String answer = name + ", добро пожаловать в байер-сервис KUPIDON " + whiteHeart;
 
-        sendMessageWithButton(chatId, answer);
+        sendMessageWithMainButtons(chatId, answer);
     }
 
-    private void sendMessageWithButton(long chatId, String textToSend) {
+    private void sendMessageWithMainButtons(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-        
+
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
-        InlineKeyboardButton startButton = new InlineKeyboardButton();
-        startButton.setText("Начать");
-        startButton.setCallbackData("start"); // Handle button click as a start command
+        InlineKeyboardButton reviewsButton = new InlineKeyboardButton();
+        reviewsButton.setText("Отзывы");
+        reviewsButton.setCallbackData("reviews");
 
-        rowInline.add(startButton);
+        InlineKeyboardButton instagramButton = new InlineKeyboardButton();
+        instagramButton.setText("Инстаграм");
+        instagramButton.setCallbackData("instagram");
+
+        InlineKeyboardButton managerButton = new InlineKeyboardButton();
+        managerButton.setText("Обратиться к менеджеру");
+        managerButton.setCallbackData("manager");
+
+        rowInline.add(reviewsButton);
+        rowInline.add(instagramButton);
+        rowInline.add(managerButton);
+
         rowsInline.add(rowInline);
 
         markupInline.setKeyboard(rowsInline);
@@ -105,8 +117,22 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(long chatId, String textToSend) {
+    private void sendReviewsLink(long chatId) {
+        String reviewsUrl = "https://t.me/feedbackkupidon";
+        sendMessage(chatId, "Вы можете прочитать отзывы в нашем канале: " + reviewsUrl);
+    }
 
+    private void sendInstagramLink(long chatId) {
+        String instagramUrl = "https://www.instagram.com/kupidon_buyerservice/?igsh=ampzend5ejR6MDAx&utm_source=qr";
+        sendMessage(chatId, "Перейдите на наш Instagram: " + instagramUrl);
+    }
+
+    private void sendManagerChat(long chatId) {
+        String managerUsername = "@MarinaKupidon";
+        sendMessage(chatId, "Вы можете связаться с менеджером: " + managerUsername);
+    }
+
+    private void sendMessage(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
@@ -114,7 +140,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
-        }
+    }
+
     }
 
