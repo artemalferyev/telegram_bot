@@ -29,10 +29,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         listOfCommands.add(new BotCommand("/start", "получить приветствование"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
+        } catch (TelegramApiException e) {
         }
-        catch (TelegramApiException e){
-        }
-}
+    }
 
     @Override
     public String getBotUsername() {
@@ -46,38 +45,56 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-
-            if (messageText.equals("/start") || messageText.equals("Начать")) {
-                startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-            } else {
-                sendMessage(chatId, "Для начала нажмите кнопку 'Начать'.");
-            }
-        }
-
         if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callbackData.equals("start")) {
-                startCommandReceived(chatId, update.getCallbackQuery().getFrom().getFirstName());
-            } else if (callbackData.equals("reviews")) {
-                sendReviewsLink(chatId);
-            } else if (callbackData.equals("instagram")) {
-                sendInstagramLink(chatId);
-            } else if (callbackData.equals("manager")) {
-                sendManagerChat(chatId);
+            switch (callbackData) {
+                case "reviews":   
+                    sendReviewsLink(chatId);
+                    break;
+                case "instagram":
+                    sendInstagramLink(chatId);
+                    break;
+                case "order":
+                    sendOrderMessage(chatId);
+                    break;
+                case "delivery":
+                    sendMessage(chatId, "Информация о доставке: Мы доставляем товары по всему миру. Свяжитесь с менеджером для уточнения деталей.");
+                    break;
+                case "terms":
+                    sendMessage(chatId, "Условия покупки: Полные условия можно узнать на нашем сайте или у менеджера.");
+                    break;
+                default:
+                    sendMessage(chatId, "Неизвестная команда.");
+            }
+        } else if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageText = update.getMessage().getText();
+            long chatId = update.getMessage().getChatId();
+
+            if (messageText.equals("/start")) {
+                String name = update.getMessage().getChat().getFirstName();
+                sendWelcomeMessage(chatId, name);
+            } else {
+                sendMessage(chatId, "Неизвестная команда. Используйте /start.");
             }
         }
     }
 
-    private void startCommandReceived(long chatId, String name) {
-        String whiteHeart = "\uD83E\uDD0D";
-        String answer = name + ", добро пожаловать в байер-сервис KUPIDON " + whiteHeart;
+    private void sendWelcomeMessage(long chatId, String name) {
+        String textToSend = name + ", здравствуйте! \n\n" +
+                "Это наш бот-помощник байер-сервиса KUPIDON, созданный для вашего удобства. \n\n" +
+                "Мы помогаем осуществлять покупки желаемых товаров из США, Европы, а также ювелирных украшений из Дубая. \n\n" +
+                "Почему шопинг с KUPIDON — это лучший выбор? Вот 5 причин: \n\n" +
+                "- Прозрачная и адекватная наценка. \n" +
+                "- Бесплатные замеры. \n" +
+                "- Только оригинальные брендовые вещи с гарантией качества и подлинности. \n" +
+                "- Индивидуальный подход к каждому клиенту. \n" +
+                "- Выгодные условия доставки. \n\n" +
+                "Рады помочь вам с покупками! \n" +
+                "Выберите интересующий раздел ниже 🔻";
 
-        sendMessageWithMainButtons(chatId, answer);
+        sendMessageWithMainButtons(chatId, textToSend);
     }
 
     private void sendMessageWithMainButtons(long chatId, String textToSend) {
@@ -87,7 +104,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
         InlineKeyboardButton reviewsButton = new InlineKeyboardButton();
         reviewsButton.setText("Отзывы");
@@ -97,15 +113,23 @@ public class TelegramBot extends TelegramLongPollingBot {
         instagramButton.setText("Инстаграм");
         instagramButton.setCallbackData("instagram");
 
-        InlineKeyboardButton managerButton = new InlineKeyboardButton();
-        managerButton.setText("Обратиться к менеджеру");
-        managerButton.setCallbackData("manager");
+        InlineKeyboardButton orderButton = new InlineKeyboardButton();
+        orderButton.setText("Оформить заказ");
+        orderButton.setCallbackData("order");
 
-        rowInline.add(reviewsButton);
-        rowInline.add(instagramButton);
-        rowInline.add(managerButton);
+        InlineKeyboardButton deliveryButton = new InlineKeyboardButton();
+        deliveryButton.setText("Доставка");
+        deliveryButton.setCallbackData("delivery");
 
-        rowsInline.add(rowInline);
+        InlineKeyboardButton termsButton = new InlineKeyboardButton();
+        termsButton.setText("Условия");
+        termsButton.setCallbackData("terms");
+
+        rowsInline.add(List.of(reviewsButton));
+        rowsInline.add(List.of(instagramButton));
+        rowsInline.add(List.of(orderButton));
+        rowsInline.add(List.of(deliveryButton));
+        rowsInline.add(List.of(termsButton));
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
@@ -127,9 +151,14 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage(chatId, "Перейдите на наш Instagram: " + instagramUrl);
     }
 
-    private void sendManagerChat(long chatId) {
+    private void sendOrderMessage(long chatId) {
         String managerUsername = "@MarinaKupidon";
-        sendMessage(chatId, "Вы можете связаться с менеджером: " + managerUsername);
+        String messageText = "Мы будем рады Вам помочь ❤️\n" +
+                "Скажите, пожалуйста, что Вас интересует.\n\n" +
+                "Вы также можете прислать фото, видео или голосовое сообщение ☺️\n\n" +
+                "Свяжитесь с нами здесь: " + managerUsername;
+
+        sendMessage(chatId, messageText);
     }
 
     private void sendMessage(long chatId, String textToSend) {
@@ -143,6 +172,4 @@ public class TelegramBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
-
-    }
-
+}
