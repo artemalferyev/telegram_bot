@@ -48,44 +48,61 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
+
     @Override
     public void onUpdateReceived(Update update) {
-
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            switch (messageText) {
 
-                case "/start":
-                        startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    break;
+            if (messageText.equals("/start") || messageText.equals("Начать")) {
+                startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+            } else {
+                sendMessage(chatId, "Для начала нажмите кнопку 'Начать'.");
+            }
+        }
 
-                case "/register":
+        if (update.hasCallbackQuery()) {
+            String callbackData = update.getCallbackQuery().getData();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-                    register(chatId);
-                    break;
-                    
-                default:
-                        sendMessage(chatId, "Неизвестная команда. Используйте /start.");
+            if (callbackData.equals("start")) {
+                startCommandReceived(chatId, update.getCallbackQuery().getFrom().getFirstName());
             }
         }
     }
 
-    private void register(long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText("Вы хотите зарегистрироваться?");
-
-        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-    }
-
     private void startCommandReceived(long chatId, String name) {
-
         String whiteHeart = "\uD83E\uDD0D";
         String answer = name + ", добро пожаловать в байер-сервис KUPIDON " + whiteHeart;
 
-        sendMessage(chatId, answer);
+        sendMessageWithButton(chatId, answer);
+    }
+
+    private void sendMessageWithButton(long chatId, String textToSend) {
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+        
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        InlineKeyboardButton startButton = new InlineKeyboardButton();
+        startButton.setText("Начать");
+        startButton.setCallbackData("start"); // Handle button click as a start command
+
+        rowInline.add(startButton);
+        rowsInline.add(rowInline);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMessage(long chatId, String textToSend) {
