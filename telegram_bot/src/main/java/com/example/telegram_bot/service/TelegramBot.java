@@ -1,8 +1,6 @@
 package com.example.telegram_bot.service;
 
 import com.example.telegram_bot.config.BotConfig;
-import com.vdurmont.emoji.EmojiParser;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -50,7 +48,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             switch (callbackData) {
-                case "reviews":   
+                case "reviews":
                     sendReviewsLink(chatId);
                     break;
                 case "instagram":
@@ -125,11 +123,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         termsButton.setText("Условия");
         termsButton.setCallbackData("terms");
 
+        InlineKeyboardButton catalogButton = new InlineKeyboardButton();
+        catalogButton.setText("Каталог");
+        catalogButton.setUrl("https://t.me/kupidonbuyer");
+
         rowsInline.add(List.of(reviewsButton));
         rowsInline.add(List.of(instagramButton));
         rowsInline.add(List.of(orderButton));
         rowsInline.add(List.of(deliveryButton));
         rowsInline.add(List.of(termsButton));
+        rowsInline.add(List.of(catalogButton));
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
