@@ -48,9 +48,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             switch (callbackData) {
-                case "reviews":
-                    sendReviewsLink(chatId);
-                    break;
                 case "order":
                     sendOrderMessage(chatId);
                     break;
@@ -101,7 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         InlineKeyboardButton reviewsButton = new InlineKeyboardButton();
         reviewsButton.setText("Отзывы");
-        reviewsButton.setCallbackData("reviews");
+        reviewsButton.setUrl("https://t.me/@feedbackkupidon");
 
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
         orderButton.setText("Оформить заказ");
@@ -126,33 +123,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         rowsInline.add(List.of(catalogButton));
 
         markupInline.setKeyboard(rowsInline);
-        message.setReplyMarkup(markupInline);
-
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void sendReviewsLink(long chatId) {
-        String reviewsUrl = "https://t.me/feedbackkupidon";
-
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-        InlineKeyboardButton reviewButton = new InlineKeyboardButton();
-        reviewButton.setText("Отзывы");
-        reviewButton.setUrl(reviewsUrl);
-
-        rowInline.add(reviewButton);
-        rowsInline.add(rowInline);
-
-        markupInline.setKeyboard(rowsInline);
-
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
         message.setReplyMarkup(markupInline);
 
         try {
