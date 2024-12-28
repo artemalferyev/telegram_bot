@@ -138,22 +138,21 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void sendReviewsLink(long chatId) {
         String reviewsUrl = "https://t.me/feedbackkupidon";
 
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText("Вы можете прочитать отзывы в нашем канале:");
-
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        
+
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton reviewButton = new InlineKeyboardButton();
-        reviewButton.setText("Перейти к отзывам");
+        reviewButton.setText("Отзывы");
         reviewButton.setUrl(reviewsUrl);
 
         rowInline.add(reviewButton);
         rowsInline.add(rowInline);
 
         markupInline.setKeyboard(rowsInline);
+
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
         message.setReplyMarkup(markupInline);
 
         try {
