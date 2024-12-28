@@ -98,7 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         InlineKeyboardButton reviewsButton = new InlineKeyboardButton();
         reviewsButton.setText("Отзывы");
-        reviewsButton.setUrl("https://t.me/@feedbackkupidon");
+        reviewsButton.setUrl("https://t.me/feedbackkupidon");
 
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
         orderButton.setText("Оформить заказ");
