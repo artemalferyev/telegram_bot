@@ -19,9 +19,9 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
+    private static final String MANAGER_USERNAME = "@MarinaKupidon";
 
     public TelegramBot(BotConfig config) {
-
         this.config = config;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "получить приветствование"));
@@ -68,7 +68,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
-                sendMessage(chatId, "Неизвестная команда. Используйте /start.");
+                forwardToManager(chatId, messageText);
             }
         }
     }
@@ -133,11 +133,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void sendOrderMessage(long chatId) {
-        String managerUsername = "@MarinaKupidon";
         String messageText = "Мы будем рады Вам помочь ❤️\n" +
                 "Скажите, пожалуйста, что Вас интересует.\n\n" +
-                "Вы также можете прислать фото, видео или голосовое сообщение ☺️\n\n" +
-                "Свяжитесь с нами здесь: " + managerUsername;
+                "Вы также можете прислать фото, видео или голосовое сообщение ☺️";
 
         sendMessage(chatId, messageText);
     }
@@ -149,6 +147,18 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void forwardToManager(long userChatId, String messageText) {
+        SendMessage forwardToManagerMessage = new SendMessage();
+        forwardToManagerMessage.setChatId(MANAGER_USERNAME);  // Send to manager
+        forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
+
+        try {
+            execute(forwardToManagerMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
