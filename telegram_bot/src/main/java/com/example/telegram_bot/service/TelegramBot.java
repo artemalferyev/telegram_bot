@@ -19,7 +19,8 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
-    private static final String MANAGER_USERNAME = "@MarinaKupidon";
+
+    private static final String MANAGER_USER_ID = "@MarinaKupidon";
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -28,6 +29,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
@@ -64,6 +66,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
+            // If user responds after pressing "Оформить заказ"
             if (messageText.equals("/start")) {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
@@ -154,7 +157,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void forwardToManager(long userChatId, String messageText) {
         SendMessage forwardToManagerMessage = new SendMessage();
-        forwardToManagerMessage.setChatId(MANAGER_USERNAME);  // Send to manager
+        forwardToManagerMessage.setChatId(MANAGER_USER_ID);
         forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
 
         try {
