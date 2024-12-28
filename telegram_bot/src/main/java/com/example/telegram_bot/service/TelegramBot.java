@@ -51,9 +51,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "reviews":
                     sendReviewsLink(chatId);
                     break;
-                case "instagram":
-                    sendInstagramLink(chatId);
-                    break;
                 case "order":
                     sendOrderMessage(chatId);
                     break;
@@ -106,10 +103,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         reviewsButton.setText("Отзывы");
         reviewsButton.setCallbackData("reviews");
 
-        InlineKeyboardButton instagramButton = new InlineKeyboardButton();
-        instagramButton.setText("Инстаграм");
-        instagramButton.setCallbackData("instagram");
-
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
         orderButton.setText("Оформить заказ");
         orderButton.setCallbackData("order");
@@ -127,7 +120,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         catalogButton.setUrl("https://t.me/kupidonbuyer");
 
         rowsInline.add(List.of(reviewsButton));
-        rowsInline.add(List.of(instagramButton));
         rowsInline.add(List.of(orderButton));
         rowsInline.add(List.of(deliveryButton));
         rowsInline.add(List.of(termsButton));
@@ -145,12 +137,30 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void sendReviewsLink(long chatId) {
         String reviewsUrl = "https://t.me/feedbackkupidon";
-        sendMessage(chatId, "Вы можете прочитать отзывы в нашем канале: " + reviewsUrl);
-    }
 
-    private void sendInstagramLink(long chatId) {
-        String instagramUrl = "https://www.instagram.com/kupidon_buyerservice/?igsh=ampzend5ejR6MDAx&utm_source=qr";
-        sendMessage(chatId, "Перейдите на наш Instagram: " + instagramUrl);
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText("Вы можете прочитать отзывы в нашем канале:");
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+        InlineKeyboardButton reviewButton = new InlineKeyboardButton();
+        reviewButton.setText("Перейти к отзывам");
+        reviewButton.setUrl(reviewsUrl);
+
+        rowInline.add(reviewButton);
+        rowsInline.add(rowInline);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendOrderMessage(long chatId) {
