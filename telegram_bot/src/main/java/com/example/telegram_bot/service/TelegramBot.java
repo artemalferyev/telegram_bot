@@ -20,7 +20,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
 
-    private static final long MANAGER_USER_ID = 6614865222L;
+    private static final long MANAGER_USER_ID = 6614865222L; // Replace with the correct manager ID
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -155,15 +155,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void forwardToManager(long userChatId, String messageText) {
+        System.out.println("Forwarding message to manager...");
+
         SendMessage forwardToManagerMessage = new SendMessage();
         forwardToManagerMessage.setChatId(String.valueOf(MANAGER_USER_ID));
         forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
 
         try {
             execute(forwardToManagerMessage);
+            System.out.println("Message forwarded to manager successfully.");
         } catch (TelegramApiException e) {
             e.printStackTrace();
             sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
+            // Log the error to see what went wrong
+            System.err.println("Error while forwarding message: " + e.getMessage());
         }
     }
 }
