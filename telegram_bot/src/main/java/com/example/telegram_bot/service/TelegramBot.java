@@ -155,35 +155,40 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void forwardToManager(long userChatId, String messageText) {
-        System.out.println("Forwarding message to manager...");
+        // Prevent the manager from receiving their own message
+        if (userChatId != MANAGER_USER_ID) {
+            System.out.println("Forwarding message to manager...");
 
-        SendMessage forwardToManagerMessage = new SendMessage();
-        forwardToManagerMessage.setChatId(String.valueOf(MANAGER_USER_ID));
-        forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
+            SendMessage forwardToManagerMessage = new SendMessage();
+            forwardToManagerMessage.setChatId(String.valueOf(MANAGER_USER_ID));
+            forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
 
-        try {
-            execute(forwardToManagerMessage);
-            System.out.println("Message forwarded to manager successfully.");
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-            sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
-            // Log the error to see what went wrong
-            System.err.println("Error while forwarding message: " + e.getMessage());
+            try {
+                execute(forwardToManagerMessage);
+                System.out.println("Message forwarded to manager successfully.");
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+                sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
+                // Log the error to see what went wrong
+                System.err.println("Error while forwarding message: " + e.getMessage());
+            }
         }
     }
 
-    // Method to allow manager to send a reply back to the user
     public void forwardMessageToUser(long managerChatId, long userChatId, String managerMessage) {
-        SendMessage sendMessageToUser = new SendMessage();
-        sendMessageToUser.setChatId(String.valueOf(userChatId));
-        sendMessageToUser.setText("Ответ от менеджера: " + managerMessage);
+        // Ensure only responses from the manager go to the user
+        if (managerChatId == MANAGER_USER_ID) {
+            SendMessage sendMessageToUser = new SendMessage();
+            sendMessageToUser.setChatId(String.valueOf(userChatId));
+            sendMessageToUser.setText("Ответ от менеджера: " + managerMessage);
 
-        try {
-            execute(sendMessageToUser);
-            System.out.println("Manager's response sent to user successfully.");
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-            System.err.println("Error while sending response to user: " + e.getMessage());
+            try {
+                execute(sendMessageToUser);
+                System.out.println("Manager's response sent to user successfully.");
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+                System.err.println("Error while sending response to user: " + e.getMessage());
+            }
         }
     }
 }
