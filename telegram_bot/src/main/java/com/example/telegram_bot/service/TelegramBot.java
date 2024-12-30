@@ -20,8 +20,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
 
-    private static final long MANAGER_USER_ID = 6614865222L; // Replace with the correct manager ID
-
+    private static final long MANAGER_USER_ID = 6614865222L;
     public TelegramBot(BotConfig config) {
         this.config = config;
         List<BotCommand> listOfCommands = new ArrayList<>();
@@ -70,7 +69,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
-                forwardToManager(chatId, messageText); // Forward user message to the manager
+                forwardToManager(chatId, messageText);
             }
         }
     }
@@ -155,7 +154,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void forwardToManager(long userChatId, String messageText) {
-        // Prevent the manager from receiving their own message
         if (userChatId != MANAGER_USER_ID) {
             System.out.println("Forwarding message to manager...");
 
@@ -169,14 +167,12 @@ public class TelegramBot extends TelegramLongPollingBot {
             } catch (TelegramApiException e) {
                 e.printStackTrace();
                 sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
-                // Log the error to see what went wrong
                 System.err.println("Error while forwarding message: " + e.getMessage());
             }
         }
     }
 
     public void forwardMessageToUser(long managerChatId, long userChatId, String managerMessage) {
-        // Ensure only responses from the manager go to the user
         if (managerChatId == MANAGER_USER_ID) {
             SendMessage sendMessageToUser = new SendMessage();
             sendMessageToUser.setChatId(String.valueOf(userChatId));
