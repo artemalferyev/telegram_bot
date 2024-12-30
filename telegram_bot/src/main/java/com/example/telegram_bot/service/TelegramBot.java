@@ -13,18 +13,26 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
-    final BotConfig config;
-
+    private final BotConfig config;
     private static final long MANAGER_USER_ID = 6614865222L;
+
+    // Map to track user-manager message flow
+    private final Map<Long, Long> userToManagerMap = new HashMap<>();
+
     public TelegramBot(BotConfig config) {
         this.config = config;
+
+        // Register bot commands
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "получить приветствование"));
+
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
@@ -62,13 +70,18 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, "Неизвестная команда.");
             }
         } else if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
+            String messageText = update.getMessage().getText();
 
-            if (messageText.equals("/start")) {
+            if (chatId == MANAGER_USER_ID) {
+                // Manager's response
+                handleManagerResponse(update.getMessage().getReplyToMessage(), messageText);
+            } else if (messageText.equals("/start")) {
+                // User starts the bot
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
+                // User sends a message
                 forwardToManager(chatId, messageText);
             }
         }
@@ -97,31 +110,17 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        InlineKeyboardButton reviewsButton = new InlineKeyboardButton();
-        reviewsButton.setText("Отзывы");
-        reviewsButton.setUrl("https://t.me/feedbackkupidon");
-
-        InlineKeyboardButton orderButton = new InlineKeyboardButton();
-        orderButton.setText("Оформить заказ");
-        orderButton.setCallbackData("order");
-
-        InlineKeyboardButton deliveryButton = new InlineKeyboardButton();
-        deliveryButton.setText("Доставка");
-        deliveryButton.setCallbackData("delivery");
-
-        InlineKeyboardButton termsButton = new InlineKeyboardButton();
-        termsButton.setText("Условия");
-        termsButton.setCallbackData("terms");
-
-        InlineKeyboardButton catalogButton = new InlineKeyboardButton();
-        catalogButton.setText("Каталог");
-        catalogButton.setUrl("https://t.me/kupidonbuyer");
-
-        rowsInline.add(List.of(reviewsButton));
-        rowsInline.add(List.of(orderButton));
-        rowsInline.add(List.of(deliveryButton));
-        rowsInline.add(List.of(termsButton));
-        rowsInline.add(List.of(catalogButton));
+        rowsInline.add(List.of(
+                createInlineButton("Отзывы", "https://t.me/feedbackkupidon", true),
+                createInlineButton("Оформить заказ", "order", false)
+        ));
+        rowsInline.add(List.of(
+                createInlineButton("Доставка", "delivery", false),
+                createInlineButton("Условия", "terms", false)
+        ));
+        rowsInline.add(List.of(
+                createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
+        ));
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
@@ -133,11 +132,21 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    private InlineKeyboardButton createInlineButton(String text, String dataOrUrl, boolean isUrl) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText(text);
+        if (isUrl) {
+            button.setUrl(dataOrUrl);
+        } else {
+            button.setCallbackData(dataOrUrl);
+        }
+        return button;
+    }
+
     private void sendOrderMessage(long chatId) {
         String messageText = "Мы будем рады Вам помочь ❤️\n" +
                 "Скажите, пожалуйста, что Вас интересует.\n\n" +
                 "Вы также можете прислать фото, видео или голосовое сообщение ☺️";
-
         sendMessage(chatId, messageText);
     }
 
@@ -154,37 +163,43 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void forwardToManager(long userChatId, String messageText) {
-        if (userChatId != MANAGER_USER_ID) {
-            System.out.println("Forwarding message to manager...");
+        userToManagerMap.put(userChatId, MANAGER_USER_ID);
 
-            SendMessage forwardToManagerMessage = new SendMessage();
-            forwardToManagerMessage.setChatId(String.valueOf(MANAGER_USER_ID));
-            forwardToManagerMessage.setText("Сообщение от клиента: " + "\n" + messageText);
+        SendMessage forwardMessage = new SendMessage();
+        forwardMessage.setChatId(String.valueOf(MANAGER_USER_ID));
+        forwardMessage.setText("Сообщение от пользователя " + userChatId + ":\n" + messageText);
 
-            try {
-                execute(forwardToManagerMessage);
-                System.out.println("Message forwarded to manager successfully.");
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-                sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
-                System.err.println("Error while forwarding message: " + e.getMessage());
-            }
+        try {
+            execute(forwardMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
-    public void forwardMessageToUser(long managerChatId, long userChatId, String managerMessage) {
-        if (managerChatId == MANAGER_USER_ID) {
-            SendMessage sendMessageToUser = new SendMessage();
-            sendMessageToUser.setChatId(String.valueOf(userChatId));
-            sendMessageToUser.setText("Ответ от менеджера: " + managerMessage);
+    private void handleManagerResponse(org.telegram.telegrambots.meta.api.objects.Message replyToMessage, String managerMessage) {
+        if (replyToMessage == null || replyToMessage.getText() == null) {
+            sendMessage(MANAGER_USER_ID, "Ошибка: невозможно определить пользователя.");
+            return;
+        }
 
-            try {
-                execute(sendMessageToUser);
-                System.out.println("Manager's response sent to user successfully.");
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-                System.err.println("Error while sending response to user: " + e.getMessage());
-            }
+        long userChatId = extractUserChatId(replyToMessage.getText());
+        if (userChatId == -1) {
+            sendMessage(MANAGER_USER_ID, "Ошибка: не удалось определить ID пользователя.");
+            return;
+        }
+
+        sendMessage(userChatId, "Ответ от менеджера:\n" + managerMessage);
+    }
+
+    private long extractUserChatId(String originalMessage) {
+        try {
+            int startIndex = originalMessage.indexOf("пользователя") + 12;
+            int endIndex = originalMessage.indexOf(":", startIndex);
+            if (startIndex == -1 || endIndex == -1) return -1;
+            return Long.parseLong(originalMessage.substring(startIndex, endIndex).trim());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
         }
     }
 }
