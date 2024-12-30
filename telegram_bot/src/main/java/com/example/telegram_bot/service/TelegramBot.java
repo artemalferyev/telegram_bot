@@ -70,7 +70,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
-                forwardToManager(chatId, messageText);
+                forwardToManager(chatId, messageText); // Forward user message to the manager
             }
         }
     }
@@ -169,6 +169,21 @@ public class TelegramBot extends TelegramLongPollingBot {
             sendMessage(userChatId, "Не удалось отправить сообщение менеджеру. Пожалуйста, попробуйте позже.");
             // Log the error to see what went wrong
             System.err.println("Error while forwarding message: " + e.getMessage());
+        }
+    }
+
+    // Method to allow manager to send a reply back to the user
+    public void forwardMessageToUser(long managerChatId, long userChatId, String managerMessage) {
+        SendMessage sendMessageToUser = new SendMessage();
+        sendMessageToUser.setChatId(String.valueOf(userChatId));
+        sendMessageToUser.setText("Ответ от менеджера: " + managerMessage);
+
+        try {
+            execute(sendMessageToUser);
+            System.out.println("Manager's response sent to user successfully.");
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            System.err.println("Error while sending response to user: " + e.getMessage());
         }
     }
 }
