@@ -142,7 +142,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void sendOrderMessage(long chatId) {
         String messageText = "Мы будем рады Вам помочь ❤️\n" +
                 "Скажите, пожалуйста, что Вас интересует.\n\n" +
-                "Вы также можете прислать фото, видео или голосовое сообщение ☺️";
+                "Вы можете написать ниже текстовое сообщение, а также прислать фото, видео или голосовое сообщение ☺️";
         sendMessage(chatId, messageText);
     }
 
