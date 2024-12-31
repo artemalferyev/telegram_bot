@@ -11,6 +11,11 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
+import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,20 +82,73 @@ public class TelegramBot extends TelegramLongPollingBot {
                 default:
                     sendMessage(chatId, "Неизвестная команда.");
             }
-        } else if (update.hasMessage() && update.getMessage().hasText()) {
-            long chatId = update.getMessage().getChatId();
-            String messageText = update.getMessage().getText();
+        } else if (update.hasMessage()) {
+            var message = update.getMessage();
+            long chatId = message.getChatId();
 
-            System.out.println("Received message from user, chatId: " + chatId + ", text: " + messageText);
+            if (message.hasText()) {
+                String messageText = message.getText();
+                System.out.println("Received message from user, chatId: " + chatId + ", text: " + messageText);
 
-            if (messageText.equals("/start")) {
-                String name = update.getMessage().getChat().getFirstName();
-                sendWelcomeMessage(chatId, name);
-            } else {
-                forwardToManager(update, chatId, messageText);
+                if (messageText.equals("/start")) {
+                    String name = message.getChat().getFirstName();
+                    sendWelcomeMessage(chatId, name);
+                } else {
+                    forwardToManager(update, chatId, messageText);
+                }
+            } else if (message.hasPhoto()) {
+                forwardMediaToManager(message.getPhoto().get(0).getFileId(), "photo", chatId);
+            } else if (message.hasVideo()) {
+                forwardMediaToManager(message.getVideo().getFileId(), "video", chatId);
+            } else if (message.hasAudio()) {
+                forwardMediaToManager(message.getAudio().getFileId(), "audio", chatId);
+            } else if (message.hasVoice()) {
+                forwardMediaToManager(message.getVoice().getFileId(), "voice", chatId);
             }
         }
     }
+
+    private void forwardMediaToManager(String fileId, String mediaType, long userChatId) {
+        try {
+            switch (mediaType) {
+                case "photo":
+                    SendPhoto sendPhoto = new SendPhoto();
+                    sendPhoto.setChatId(String.valueOf(MANAGER_USER_ID));
+                    sendPhoto.setPhoto(new InputFile(fileId));
+                    sendPhoto.setCaption("Фото от пользователя (ID: " + userChatId + ")");
+                    execute(sendPhoto);
+                    break;
+
+                case "video":
+                    SendVideo sendVideo = new SendVideo();
+                    sendVideo.setChatId(String.valueOf(MANAGER_USER_ID));
+                    sendVideo.setVideo(new InputFile(fileId));
+                    sendVideo.setCaption("Видео от пользователя (ID: " + userChatId + ")");
+                    execute(sendVideo);
+                    break;
+
+                case "audio":
+                    SendAudio sendAudio = new SendAudio();
+                    sendAudio.setChatId(String.valueOf(MANAGER_USER_ID));
+                    sendAudio.setAudio(new InputFile(fileId));
+                    sendAudio.setCaption("Аудио от пользователя (ID: " + userChatId + ")");
+                    execute(sendAudio);
+                    break;
+
+                case "voice":
+                    SendVoice sendVoice = new SendVoice();
+                    sendVoice.setChatId(String.valueOf(MANAGER_USER_ID));
+                    sendVoice.setVoice(new InputFile(fileId));
+                    sendVoice.setCaption("Голосовое сообщение от пользователя (ID: " + userChatId + ")");
+                    execute(sendVoice);
+                    break;
+            }
+        } catch (TelegramApiException e) {
+            System.out.println("Error forwarding " + mediaType + " to manager: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void sendWelcomeMessage(long chatId, String name) {
         String textToSend = name + ", здравствуйте! \n\n" +
                 "Я - бот-помощник байер-сервиса KUPIDON, созданный для вашего удобства. Я отвечу на все ваши вопросы! \n\n" +
