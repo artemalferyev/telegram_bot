@@ -72,18 +72,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
             String messageText = update.getMessage().getText();
 
-            // Log the message received from the user
-            System.out.println("Message received from chat ID: " + chatId + " Text: " + messageText);
+            System.out.println("Received message from user, chatId: " + chatId + ", text: " + messageText);
 
-            if (chatId == MANAGER_USER_ID) {
-                // Log details of the manager's response
-                if (update.getMessage().getReplyToMessage() != null) {
-                    System.out.println("Manager is replying to message ID: " + update.getMessage().getReplyToMessage().getMessageId());
-                } else {
-                    System.out.println("Manager response is not replying to a specific message.");
-                }
-                handleManagerResponse(update.getMessage().getReplyToMessage(), messageText);
-            } else if (messageText.equals("/start")) {
+            if (messageText.equals("/start")) {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
@@ -91,7 +82,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         }
     }
-
     private void sendWelcomeMessage(long chatId, String name) {
         String textToSend = name + ", здравствуйте! \n\n" +
                 "Я - бот-помощник байер-сервиса KUPIDON, созданный для вашего удобства. Я отвечу на все ваши вопросы! \n\n" +
@@ -199,7 +189,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         int originalMessageId = replyToMessage.getMessageId();
         Long userChatId = messageIdToUserIdMap.get(originalMessageId);
 
-        // Log the mapping attempt
         System.out.println("Attempting to find user for original message ID: " + originalMessageId);
         System.out.println("Current map: " + messageIdToUserIdMap);
 
