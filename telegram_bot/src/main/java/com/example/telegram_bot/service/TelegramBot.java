@@ -22,14 +22,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
     private static final long MANAGER_USER_ID = 6614865222L;
-
-    // Map to track user-manager message flow
-    private final Map<Long, Long> userToManagerMap = new HashMap<>();
+    private final Map<Integer, Long> messageIdToUserIdMap = new HashMap<>();
 
     public TelegramBot(BotConfig config) {
         this.config = config;
 
-        // Register bot commands
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "получить приветствование"));
 
@@ -74,14 +71,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
 
             if (chatId == MANAGER_USER_ID) {
-                // Manager's response
                 handleManagerResponse(update.getMessage().getReplyToMessage(), messageText);
             } else if (messageText.equals("/start")) {
-                // User starts the bot
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
-                // User sends a message
                 forwardToManager(chatId, messageText);
             }
         }
@@ -163,43 +157,30 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void forwardToManager(long userChatId, String messageText) {
-        userToManagerMap.put(userChatId, MANAGER_USER_ID);
-
         SendMessage forwardMessage = new SendMessage();
         forwardMessage.setChatId(String.valueOf(MANAGER_USER_ID));
         forwardMessage.setText("Сообщение от пользователя " + userChatId + ":\n" + messageText);
 
         try {
-            execute(forwardMessage);
+            var sentMessage = execute(forwardMessage);
+            messageIdToUserIdMap.put(sentMessage.getMessageId(), userChatId);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
     private void handleManagerResponse(org.telegram.telegrambots.meta.api.objects.Message replyToMessage, String managerMessage) {
-        if (replyToMessage == null || replyToMessage.getText() == null) {
+        if (replyToMessage == null) {
             sendMessage(MANAGER_USER_ID, "Ошибка: невозможно определить пользователя.");
             return;
         }
 
-        long userChatId = extractUserChatId(replyToMessage.getText());
+        long userChatId = messageIdToUserIdMap.getOrDefault(replyToMessage.getMessageId(), -1L);
         if (userChatId == -1) {
             sendMessage(MANAGER_USER_ID, "Ошибка: не удалось определить ID пользователя.");
             return;
         }
 
         sendMessage(userChatId, "Ответ от менеджера:\n" + managerMessage);
-    }
-
-    private long extractUserChatId(String originalMessage) {
-        try {
-            int startIndex = originalMessage.indexOf("пользователя") + 12;
-            int endIndex = originalMessage.indexOf(":", startIndex);
-            if (startIndex == -1 || endIndex == -1) return -1;
-            return Long.parseLong(originalMessage.substring(startIndex, endIndex).trim());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
     }
 }
