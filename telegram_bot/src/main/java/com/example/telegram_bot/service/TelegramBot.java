@@ -26,7 +26,7 @@ import java.util.Map;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
-    private static final long MANAGER_USER_ID = 749257047L;
+    private static final long MANAGER_USER_ID =  6614865222L;
     private final Map<Integer, Long> messageIdToUserIdMap = new HashMap<>();
 
     public TelegramBot(BotConfig config) {
@@ -184,13 +184,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                 createInlineButton("Оформить заказ", "order", false)
         ));
         rowsInline.add(List.of(
-                createInlineButton("Отзывы", "https://t.me/feedbackkupidon", true)
+                createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
         ));
         rowsInline.add(List.of(
                 createInlineButton("Доставка", "delivery", false)
         ));
         rowsInline.add(List.of(
-                createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
+                createInlineButton("Отзывы", "https://t.me/feedbackkupidon", true)
         ));
 
         markupInline.setKeyboard(rowsInline);
