@@ -163,7 +163,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             var sentMessage = execute(forwardMessage);
-            messageIdToUserIdMap.put(sentMessage.getMessageId(), userChatId);
+            int messageId = sentMessage.getMessageId();
+            messageIdToUserIdMap.put(messageId, userChatId);
+            System.out.println("Forwarded message ID: " + messageId + " mapped to user ID: " + userChatId);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -172,15 +174,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void handleManagerResponse(org.telegram.telegrambots.meta.api.objects.Message replyToMessage, String managerMessage) {
         if (replyToMessage == null) {
             sendMessage(MANAGER_USER_ID, "Ошибка: невозможно определить пользователя.");
+            System.out.println("No replyToMessage found in manager's response.");
             return;
         }
 
-        long userChatId = messageIdToUserIdMap.getOrDefault(replyToMessage.getMessageId(), -1L);
+        int originalMessageId = replyToMessage.getMessageId();
+        long userChatId = messageIdToUserIdMap.getOrDefault(originalMessageId, -1L);
+
         if (userChatId == -1) {
             sendMessage(MANAGER_USER_ID, "Ошибка: не удалось определить ID пользователя.");
+            System.out.println("Message ID " + originalMessageId + " not found in map.");
             return;
         }
 
         sendMessage(userChatId, "Ответ от менеджера:\n" + managerMessage);
+        System.out.println("Replied to user ID: " + userChatId + " with message: " + managerMessage);
     }
 }
