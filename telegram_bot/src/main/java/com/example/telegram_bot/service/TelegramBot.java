@@ -33,6 +33,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
+            System.out.println("Error setting bot commands: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -52,6 +53,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
+            System.out.println("Callback query received: " + callbackData);
 
             switch (callbackData) {
                 case "order":
@@ -122,6 +124,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
+            System.out.println("Error sending message with buttons: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -152,6 +155,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
+            System.out.println("Error sending message: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -163,10 +167,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             var sentMessage = execute(forwardMessage);
-            int messageId = sentMessage.getMessageId();
-            messageIdToUserIdMap.put(messageId, userChatId);
-            System.out.println("Forwarded message ID: " + messageId + " mapped to user ID: " + userChatId);
+            if (sentMessage != null) {
+                int messageId = sentMessage.getMessageId();
+                messageIdToUserIdMap.put(messageId, userChatId);
+                System.out.println("Mapped message ID " + messageId + " to user ID " + userChatId);
+            } else {
+                System.out.println("Failed to send or retrieve forwarded message details.");
+            }
         } catch (TelegramApiException e) {
+            System.out.println("Error forwarding message to manager: " + e.getMessage());
             e.printStackTrace();
         }
     }
