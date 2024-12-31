@@ -21,7 +21,7 @@ import java.util.Map;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
-    private static final long MANAGER_USER_ID = 6614865222L;
+    private static final long MANAGER_USER_ID = 749257047L;
     private final Map<Integer, Long> messageIdToUserIdMap = new HashMap<>();
 
     public TelegramBot(BotConfig config) {
