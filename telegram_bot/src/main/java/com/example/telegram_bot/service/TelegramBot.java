@@ -78,7 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String name = update.getMessage().getChat().getFirstName();
                 sendWelcomeMessage(chatId, name);
             } else {
-                forwardToManager(chatId, messageText);
+                forwardToManager(update, chatId, messageText);
             }
         }
     }
@@ -159,10 +159,21 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void forwardToManager(long userChatId, String messageText) {
+    private void forwardToManager(Update update, long userChatId, String messageText) {
+        String userName = "";
+        String firstName = update.getMessage().getChat().getFirstName();
+        String lastName = update.getMessage().getChat().getLastName();
+
+        if (firstName != null) {
+            userName += firstName;
+        }
+        if (lastName != null) {
+            userName += " " + lastName;
+        }
+
         SendMessage forwardMessage = new SendMessage();
         forwardMessage.setChatId(String.valueOf(MANAGER_USER_ID));
-        forwardMessage.setText("Сообщение от пользователя " + userChatId + ":\n" + messageText);
+        forwardMessage.setText("Сообщение от пользователя " + userName + " (ID: " + userChatId + "):\n" + messageText);
 
         try {
             var sentMessage = execute(forwardMessage);
@@ -178,6 +189,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+
 
     private void handleManagerResponse(org.telegram.telegrambots.meta.api.objects.Message replyToMessage, String managerMessage) {
         if (replyToMessage == null) {
