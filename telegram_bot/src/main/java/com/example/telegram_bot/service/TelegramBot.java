@@ -26,7 +26,7 @@ import java.util.Map;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig config;
-    private static final long MANAGER_USER_ID = 749257047L;
+    private static final long MANAGER_USER_ID = 6614865222L;
     private final Map<Integer, Long> messageIdToUserIdMap = new HashMap<>();
 
     public TelegramBot(BotConfig config) {
@@ -76,9 +76,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     "▫️ Замеры — бесплатно."
                     );
                     break;
-                case "terms":
-                    sendMessage(chatId, "Условия покупки: Полные условия можно узнать на нашем сайте или у менеджера.");
-                    break;
                 default:
                     sendMessage(chatId, "Неизвестная команда.");
             }
@@ -97,25 +94,37 @@ public class TelegramBot extends TelegramLongPollingBot {
                     forwardToManager(update, chatId, messageText);
                 }
             } else if (message.hasPhoto()) {
-                forwardMediaToManager(message.getPhoto().get(0).getFileId(), "photo", chatId);
+                forwardMediaToManager(message.getPhoto().get(0).getFileId(), "photo", chatId, update);
             } else if (message.hasVideo()) {
-                forwardMediaToManager(message.getVideo().getFileId(), "video", chatId);
+                forwardMediaToManager(message.getVideo().getFileId(), "video", chatId, update);
             } else if (message.hasAudio()) {
-                forwardMediaToManager(message.getAudio().getFileId(), "audio", chatId);
+                forwardMediaToManager(message.getAudio().getFileId(), "audio", chatId, update);
             } else if (message.hasVoice()) {
-                forwardMediaToManager(message.getVoice().getFileId(), "voice", chatId);
+                forwardMediaToManager(message.getVoice().getFileId(), "voice", chatId, update);
             }
         }
     }
 
-    private void forwardMediaToManager(String fileId, String mediaType, long userChatId) {
+    private void forwardMediaToManager(String fileId, String mediaType, long userChatId, Update update) {
         try {
+            // Retrieve user name
+            String userName = "";
+            String firstName = update.getMessage().getChat().getFirstName();
+            String lastName = update.getMessage().getChat().getLastName();
+
+            if (firstName != null) {
+                userName += firstName;
+            }
+            if (lastName != null) {
+                userName += " " + lastName;
+            }
+
             switch (mediaType) {
                 case "photo":
                     SendPhoto sendPhoto = new SendPhoto();
                     sendPhoto.setChatId(String.valueOf(MANAGER_USER_ID));
                     sendPhoto.setPhoto(new InputFile(fileId));
-                    sendPhoto.setCaption("Фото от пользователя (ID: " + userChatId + ")");
+                    sendPhoto.setCaption("Фото от пользователя " + userName + " (ID: " + userChatId + ")");
                     execute(sendPhoto);
                     break;
 
@@ -123,7 +132,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     SendVideo sendVideo = new SendVideo();
                     sendVideo.setChatId(String.valueOf(MANAGER_USER_ID));
                     sendVideo.setVideo(new InputFile(fileId));
-                    sendVideo.setCaption("Видео от пользователя (ID: " + userChatId + ")");
+                    sendVideo.setCaption("Видео от пользователя " + userName + " (ID: " + userChatId + ")");
                     execute(sendVideo);
                     break;
 
@@ -131,7 +140,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     SendAudio sendAudio = new SendAudio();
                     sendAudio.setChatId(String.valueOf(MANAGER_USER_ID));
                     sendAudio.setAudio(new InputFile(fileId));
-                    sendAudio.setCaption("Аудио от пользователя (ID: " + userChatId + ")");
+                    sendAudio.setCaption("Аудио от пользователя " + userName + " (ID: " + userChatId + ")");
                     execute(sendAudio);
                     break;
 
@@ -139,7 +148,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     SendVoice sendVoice = new SendVoice();
                     sendVoice.setChatId(String.valueOf(MANAGER_USER_ID));
                     sendVoice.setVoice(new InputFile(fileId));
-                    sendVoice.setCaption("Голосовое сообщение от пользователя (ID: " + userChatId + ")");
+                    sendVoice.setCaption("Голосовое сообщение от пользователя " + userName + " (ID: " + userChatId + ")");
                     execute(sendVoice);
                     break;
             }
@@ -148,7 +157,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
-
     private void sendWelcomeMessage(long chatId, String name) {
         String textToSend = name + ", здравствуйте! \n\n" +
                 "Я - бот-помощник байер-сервиса KUPIDON, созданный для вашего удобства. Я отвечу на все ваши вопросы! \n\n" +
@@ -173,12 +181,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
         rowsInline.add(List.of(
-                createInlineButton("Отзывы", "https://t.me/feedbackkupidon", true),
                 createInlineButton("Оформить заказ", "order", false)
         ));
         rowsInline.add(List.of(
-                createInlineButton("Доставка", "delivery", false),
-                createInlineButton("Условия", "terms", false)
+                createInlineButton("Отзывы", "https://t.me/feedbackkupidon", true)
+        ));
+        rowsInline.add(List.of(
+                createInlineButton("Доставка", "delivery", false)
         ));
         rowsInline.add(List.of(
                 createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
