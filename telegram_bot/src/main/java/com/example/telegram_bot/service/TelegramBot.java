@@ -172,7 +172,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 messageIdToUserIdMap.put(messageId, userChatId);
                 System.out.println("Mapped message ID " + messageId + " to user ID " + userChatId);
             } else {
-                System.out.println("Failed to send or retrieve forwarded message details.");
+                System.out.println("Error: Sent message is null. Unable to map user chat ID.");
             }
         } catch (TelegramApiException e) {
             System.out.println("Error forwarding message to manager: " + e.getMessage());
@@ -182,21 +182,27 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void handleManagerResponse(org.telegram.telegrambots.meta.api.objects.Message replyToMessage, String managerMessage) {
         if (replyToMessage == null) {
-            sendMessage(MANAGER_USER_ID, "Ошибка: невозможно определить пользователя.");
-            System.out.println("No replyToMessage found in manager's response.");
+            sendMessage(MANAGER_USER_ID, "Ошибка: невозможно определить пользователя. Пожалуйста, ответьте на конкретное сообщение.");
+            System.out.println("Error: replyToMessage is null. Ensure the manager is replying to a forwarded user message.");
             return;
         }
 
         int originalMessageId = replyToMessage.getMessageId();
-        long userChatId = messageIdToUserIdMap.getOrDefault(originalMessageId, -1L);
+        Long userChatId = messageIdToUserIdMap.get(originalMessageId);
 
-        if (userChatId == -1) {
-            sendMessage(MANAGER_USER_ID, "Ошибка: не удалось определить ID пользователя.");
-            System.out.println("Message ID " + originalMessageId + " not found in map.");
+        if (userChatId == null) {
+            sendMessage(MANAGER_USER_ID, "Ошибка: не удалось найти соответствующего пользователя для ответа.");
+            System.out.println("Error: No user mapping found for message ID " + originalMessageId + ". Current map: " + messageIdToUserIdMap);
             return;
         }
 
-        sendMessage(userChatId, "Ответ от менеджера:\n" + managerMessage);
-        System.out.println("Replied to user ID: " + userChatId + " with message: " + managerMessage);
+        try {
+            sendMessage(userChatId, "Ответ от менеджера:\n" + managerMessage);
+            System.out.println("Successfully replied to user ID: " + userChatId + " with manager message: " + managerMessage);
+        } catch (Exception e) {
+            sendMessage(MANAGER_USER_ID, "Ошибка: не удалось отправить сообщение пользователю.");
+            System.out.println("Error sending message to user ID " + userChatId + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
