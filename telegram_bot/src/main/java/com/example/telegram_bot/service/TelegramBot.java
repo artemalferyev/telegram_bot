@@ -107,7 +107,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void forwardMediaToManager(String fileId, String mediaType, long userChatId, Update update) {
         try {
-            // Retrieve user name
+
             String userName = "";
             String firstName = update.getMessage().getChat().getFirstName();
             String lastName = update.getMessage().getChat().getLastName();
@@ -181,7 +181,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
         rowsInline.add(List.of(
-                createInlineButton("Оформить заказ", "order", false)
+                createInlineButton("Оформить заказ", "https://t.me/marinakupupidon", true)
         ));
         rowsInline.add(List.of(
                 createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
