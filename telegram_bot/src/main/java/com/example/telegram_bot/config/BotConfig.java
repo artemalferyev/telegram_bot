@@ -10,10 +10,10 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("application.properties")
 public class BotConfig {
 
-    @Value("${bot.name}")
+    @Value("kupidonbuyerservice_bot")
     String botName;
 
-    @Value("${bot.token}")
+    @Value("8067532440:AAGkgv3au6rW-DOTkdsK_yiIw9aA-2zVfAs")
     String token;
 
     public String getBotName() {
