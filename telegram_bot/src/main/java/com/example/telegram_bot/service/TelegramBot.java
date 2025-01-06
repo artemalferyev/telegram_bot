@@ -181,7 +181,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
         rowsInline.add(List.of(
-                createInlineButton("Оформить заказ", "https://t.me/marinakupupidon", true)
+                createInlineButton("Оформить заказ", "https://t.me/marinakupidon", true)
         ));
         rowsInline.add(List.of(
                 createInlineButton("Каталог", "https://t.me/kupidonbuyer", true)
