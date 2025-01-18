@@ -142,7 +142,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 "src/main/resources/photo_2025-01-17 15.47.13.jpeg"
         };
 
-        sendPhotos(chatId, europePhotoPaths, "❤\uFE0F");
+        sendPhotos(chatId, europePhotoPaths, "\uD83C\uDDEA\uD83C\uDDFA");
     }
     private void sendUsaPhotos(long chatId) {
         String[] usaPhotoPaths = {
@@ -150,7 +150,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 "src/main/resources/photo_2025-01-17 15.47.18.jpeg"
         };
 
-        sendPhotos(chatId, usaPhotoPaths, "❤\uFE0F");
+        sendPhotos(chatId, usaPhotoPaths, "\uD83C\uDDFA\uD83C\uDDF8");
     }
     private void sendPhotos(long chatId, String[] photoPaths, String introText) {
         try {
