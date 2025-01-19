@@ -149,6 +149,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         sendPhotos(chatId, europePhotoPaths, "\uD83C\uDDEA\uD83C\uDDFA");
     }
+
     private void sendUsaPhotos(long chatId) {
         String[] usaPhotoPaths = {
                 "photo_2025-01-17 15.47.16.jpeg",
@@ -157,18 +158,27 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         sendPhotos(chatId, usaPhotoPaths, "\uD83C\uDDFA\uD83C\uDDF8");
     }
+
     private void sendPhotos(long chatId, String[] photoPaths, String introText) {
         try {
             SendMessage introMessage = new SendMessage();
             introMessage.setChatId(String.valueOf(chatId));
             introMessage.setText(introText);
-
             execute(introMessage);
 
             for (String path : photoPaths) {
+
+                InputStream photoStream = getClass().getClassLoader().getResourceAsStream(path);
+                if (photoStream == null) {
+                    System.out.println("Error: Photo not found - " + path);
+                    continue;
+                }
+
+                InputFile photoFile = new InputFile(photoStream, path);
+
                 SendPhoto photo = new SendPhoto();
                 photo.setChatId(String.valueOf(chatId));
-                photo.setPhoto(new InputFile(new File(path)));
+                photo.setPhoto(photoFile);
 
                 execute(photo);
             }
