@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,16 +104,20 @@ public class TelegramBot extends TelegramLongPollingBot {
         };
 
         try {
+            InputStream photoStream1 = getClass().getClassLoader().getResourceAsStream(photoPaths[0]);
+            InputFile inputFile1 = new InputFile(photoStream1, photoPaths[0]);
             SendPhoto firstPhoto = new SendPhoto();
             firstPhoto.setChatId(String.valueOf(chatId));
-            firstPhoto.setPhoto(new InputFile(new File(photoPaths[0])));
+            firstPhoto.setPhoto(inputFile1);
             firstPhoto.setCaption(info);
 
             execute(firstPhoto);
 
+            InputStream photoStream2 = getClass().getClassLoader().getResourceAsStream(photoPaths[1]);
+            InputFile inputFile2 = new InputFile(photoStream2, photoPaths[1]);
             SendPhoto secondPhoto = new SendPhoto();
             secondPhoto.setChatId(String.valueOf(chatId));
-            secondPhoto.setPhoto(new InputFile(new File(photoPaths[1])));
+            secondPhoto.setPhoto(inputFile2);
 
             execute(secondPhoto);
 
