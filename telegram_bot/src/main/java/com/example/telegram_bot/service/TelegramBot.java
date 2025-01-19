@@ -98,8 +98,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 "▫️ Услуга срезания ценников (больше 2-х) - 4€ (необходимо в случае, когда товар заказан на скидке и надо пройти таможенный лимит).";
 
         String[] photoPaths = {
-                "src/main/resources/photo_2025-01-17 15.47.06.jpeg",
-                "src/main/resources/photo_2025-01-17 15.47.09.jpeg"
+                "photo_2025-01-17 15.47.06.jpeg",
+                "photo_2025-01-17 15.47.09.jpeg"
         };
 
         try {
@@ -138,16 +138,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
     private void sendEuropePhotos(long chatId) {
         String[] europePhotoPaths = {
-                "src/main/resources/photo_2025-01-17 15.47.11.jpeg",
-                "src/main/resources/photo_2025-01-17 15.47.13.jpeg"
+                "photo_2025-01-17 15.47.11.jpeg",
+                "photo_2025-01-17 15.47.13.jpeg"
         };
 
         sendPhotos(chatId, europePhotoPaths, "\uD83C\uDDEA\uD83C\uDDFA");
     }
     private void sendUsaPhotos(long chatId) {
         String[] usaPhotoPaths = {
-                "src/main/resources/photo_2025-01-17 15.47.16.jpeg",
-                "src/main/resources/photo_2025-01-17 15.47.18.jpeg"
+                "photo_2025-01-17 15.47.16.jpeg",
+                "photo_2025-01-17 15.47.18.jpeg"
         };
 
         sendPhotos(chatId, usaPhotoPaths, "\uD83C\uDDFA\uD83C\uDDF8");
