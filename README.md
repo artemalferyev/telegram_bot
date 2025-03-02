@@ -24,8 +24,8 @@ Prerequisites
 Installation
 	1.	Clone the repository to your local machine:
 
-git clone https://github.com/yourusername/kupidon-telegram-bot.git
-cd kupidon-telegram-bot
+git clone https://github.com/yourusername/telegram_bot.git
+cd telegram_bot
 
 	2.	Build the project using Maven:
 
