@@ -1,6 +1,4 @@
-Here’s a sample README file for the Kupidon Telegram bot based on the code you’ve provided:
-
-Kupidon Telegram Bot
+Telegram Bot
 
 Kupidon is a Telegram bot designed to help users with the process of purchasing goods from the USA, Europe, and Dubai, with features like item ordering, delivery information, and more. It is powered by Spring Boot and uses the Telegram Bot API to provide interactive user experiences.
 
